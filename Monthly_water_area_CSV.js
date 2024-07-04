@@ -1,6 +1,10 @@
 // Load the table
 var table = ee.FeatureCollection('projects/amrutvahini-watergis/assets/Bhandara_Boundary_shape_file');
 
+// Select the Sentinel-2 image collection
+var imageCollection = ee.ImageCollection('COPERNICUS/S2')
+                          .filterBounds(table);
+
 // Function to calculate water area for a given date range
 var calculateWaterArea = function(startDate, endDate) {
   // Filter the image collection
@@ -28,11 +32,15 @@ var calculateWaterArea = function(startDate, endDate) {
                         geometry: table,
                         scale: 30,
                         maxPixels: 1e8
-                      });
+                      })
+                      .get('constant');
+  
+  // Convert area to hectares
+  var waterAreaHectares = ee.Number(waterArea).divide(10000);
 
   return ee.Feature(null, {
     'date': startDate,
-    'water_area': waterArea.get('constant')
+    'water_area_ha': waterAreaHectares
   });
 };
 
