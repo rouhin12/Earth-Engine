@@ -59,16 +59,16 @@ var edges = edgesX.add(edgesY);
 
 Map.addLayer(edges, {min: 0, max: 0.3, palette: ['white', 'black']}, 'Edges (NDWI)');
 
-// 6. Water bodies area calculation using pixel area without geometry
-var waterArea = ndwi_binary.multiply(ee.Image.pixelArea())
-                .reduceRegion({
-                  reducer: ee.Reducer.sum(),
-                  scale: 10,
-                  maxPixels: 1e9
-                });
-print('Water Area (sq meters):', waterArea.get('constant'));
-
-// 7. Convert NDWI to integer for entropy calculation
+// 6. Convert NDWI to integer for entropy calculation
 var ndwi_int = ndwi.multiply(10000).toInt32(); // Scale NDWI values for entropy
 var entropy = ndwi_int.entropy(ee.Kernel.square(5));
 Map.addLayer(entropy, {min: 0, max: 5, palette: ['black', 'white']}, 'Texture (Entropy)');
+// Define the ROI (region of interest)
+var roi = ee.FeatureCollection('projects/amrutvahini-watergis/assets/Bhandara_Boundary_shape_file');
+print(roi);
+
+// Add the ROI boundary with no fill, only the border
+Map.addLayer(roi.style({fillColor: '00000000', color: 'FF0000', width: 2}), {}, 'ROI Border');
+
+// Center the map on the ROI
+Map.centerObject(roi);
